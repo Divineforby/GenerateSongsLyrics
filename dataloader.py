@@ -4,6 +4,37 @@ import numpy as np
 import pandas as pd
 import os
 
+# Takes a numpy array of indices and create one-hot array for all of these indices
+# Return the tensor
+def onehot(indices, numFeature):
+    
+    # Indices are shaped (batch, seqlen)
+    batchSize = indices.shape[0]
+    seqLen = indices.shape[1]
+    
+    # 2d Array of zeros for easier indexing
+    onehotted = np.zeros((batchSize * seqLen, numFeature))
+
+    # Index the correct location for each character
+    onehotted[np.arange(batchSize*seqLen), indices.reshape(1,-1)] = 1
+
+    return torch.Tensor(onehotted.reshape(batchSize, seqLen, -1))
+
+# Custom collate function for Dataloader to pack variable-length sequences for batch
+def Pad(batch):
+    # Sort batch by length of sequence
+    batch.sort(key=lambda x:len(x[1]), reverse=True)
+    
+    # Take in batch of ordinals and split between data and target
+    data = [x[0] for x in batch]
+    target = [x[1] for x in batch]
+    
+    # Pad both data and target with EOS
+    data = torch.nn.utils.rnn.pad_sequence(data, batch_first=True, padding_value=1)
+    target = torch.nn.utils.rnn.pad_sequence(target, batch_first=True, padding_value=1)
+    
+    return data, target
+
 # Pytorch dataset of for song lyrics
 class SongData(Dataset):
     
@@ -21,17 +52,11 @@ class SongData(Dataset):
         # Preprocess data
         self.preprocessData(self.data)
 
-    # Attach SOS and EOS, uniform text lengths, one-hot all characters
+    # Attach SOS and EOS, uniform text lengths, convert all characters to one-hot indices
     def preprocessData(self, data):
         
         # Attach SOS, EOS to all text
         data['text'] = '\2' + data['text'] + '\3'
-        
-        # Find maximum length of characters 
-        maxLen = max(data['text'].apply(len))
-        
-        # Append EOS to each text until the maxLen is reached
-        data['text'] = data['text'].apply(lambda x: x + ('\3' * (maxLen - len(x))))
         
         # Translate each character into its ordinals once for easy one-hot encoding
         data['to_onehot'] = data['text'].apply(lambda x: [self.encode[c] for c in x])
@@ -45,26 +70,12 @@ class SongData(Dataset):
     
         # Get list of ordinal values to transform for this text
         indices = self.data.iloc[idx].to_onehot
-        onehotted = self.onehotted(indices[:-1])
-        labels = torch.Tensor(indices[1:])
+        ordinals = torch.tensor(indices[:-1])
+        labels = torch.tensor(indices[1:])
         
         # One hots the indices and return the tensor
-        return onehotted, labels.int()
+        return ordinals, labels
     
-    # Takes a list of indices and create one-hot array for all of these indices
-    # Return the tensor
-    def onehotted(self, indices):
-        
-        # Dummy array to be indexed
-        # Row = Character, Column = Possible character
-        # Size of one-hot is 1xC where C is possible characters
-        # Size of matrix is NxC where N is the number of characters in this text
-        dummy = np.zeros((len(indices), len(self.encode)))
-        
-        # Index the correct location for each character
-        dummy[np.arange(len(indices)), indices] = 1
-        
-        return torch.Tensor(dummy)
     
     # Finds all unique characters and assign them an ordinal value 
     def ChartoOrd(self, data):
@@ -101,5 +112,5 @@ class SongData(Dataset):
             decoded[v] = k
         
         
-        return decoded
-        
+        return decoded 
+ 
