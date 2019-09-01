@@ -10,5 +10,5 @@ cfg['use_cuda'] = True
 cfg['lr'] = 1e-5
 cfg['max_epochs'] = 50
 cfg['batch_size'] = 16
-cfg['l2_penalty'] = 0.2
+cfg['l2_penalty'] = 0.25
 cfg['validation_batch_size'] = 64

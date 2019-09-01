@@ -114,7 +114,7 @@ def train(model, train_set, val_set):
     # Early stopping boolean
     # If the values in the early_stopping_range is monotonically increasing
     early_stopping = False
-    early_stopping_range = 5
+    early_stopping_range = 4
 
     # For each epoch train the model on the data
     for e in maxEpochs:
@@ -187,8 +187,12 @@ def train(model, train_set, val_set):
                                   .format(e, idx, avg_loss, val_loss))
                                   
                 # Check for early stopping with monotonicity
-                # Only check when we have at least 3 values to check
-                if (len(epoch_val_losses[early_stopping_range::-1]) == early_stopping_range and monotonicIncr(epoch_val_losses[early_stopping_range::-1])):
+                # Only check when we have at least early_stopping_range values to check
+                # Give at least one epoch before we check for early stopping
+                if (e > 0 and 
+                    len(epoch_val_losses[early_stopping_range::-1]) == early_stopping_range and 
+                    monotonicIncr(epoch_val_losses[early_stopping_range::-1])):
+                    
                     early_stopping = True            
 
             # If early stopping we stop going through the data set
