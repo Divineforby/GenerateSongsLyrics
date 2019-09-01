@@ -215,10 +215,10 @@ def train(model, train_set, val_set):
 def monotonicIncr(lst):
 
     # Monotonic increasing means subsequent values are always larger
-    # Differences are then always <= 0
-    diff = np.diff(np.array(lst))
+    # Differences are then always >= 0
+    diff = np.diff(lst[::-1])    
     diff = (diff >= 0)
-    
+   
     # If all the differences are > 0 we are monotonically decreasing
     return diff.all()
 
