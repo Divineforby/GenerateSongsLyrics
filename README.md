@@ -41,9 +41,10 @@ There will also be a log for printed values of training and validation loss as w
 
 Generate -
 
-Command: python generate.py 'Temperature' 'Number of Samples' 'Max Length of Samples'
+Command: python generate.py <Temperature> <Number of Samples> <Max Length of Samples>
     
 Takes in 3 arguments to begin generating new song lyrics. All output will be in the results folder.
+Path to which model to use can be defined in the file itself in the main function.
 
 
 Default Files:
