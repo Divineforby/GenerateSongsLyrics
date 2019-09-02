@@ -132,7 +132,7 @@ if __name__ == "__main__":
     resultFile = "generatedsamples_temp_{0}".format(temp)
     
     with open(os.path.join(resultPath, resultFile), "w+") as resFile:
-        resFile.write("Generated sample using these options: Temperature - {0} Number of Samples - {1} Max Length Per Sample - {2}".format(temp, num_samples, max_len)) 
+        resFile.write("Generated sample using these options: Temperature - {0} Number of Samples - {1} Max Length Per Sample - {2}\n".format(temp, num_samples, max_len)) 
         for idx, text in enumerate(gen):
             resFile.write("SAMPLE NUMBER {0} \n\n".format(idx))
             resFile.write(text+"\n")
