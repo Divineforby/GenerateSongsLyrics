@@ -6,6 +6,15 @@ from dataloader import data_split,onehot
 from models import GenLSTM
 from configs import cfg
 
+import torch
+import pandas as pd
+import numpy as np
+import os
+import sys
+from dataloader import data_split,onehot,SongData
+from models import GenLSTM
+from configs import cfg
+
 # Load the state_dict of a model given path
 def load_model(path):
     
@@ -18,12 +27,12 @@ def load_model(path):
     return model
 
 # Takes a pre-trained model and generate new text
-def generateText(data, model):
+def generateText(data, model, temp, num_samples, max_len):
     
     # Number of texts to generate
     # Max length of text
-    numText = 10
-    maxLen = 1000
+    numText = num_samples
+    maxLen = max_len
     
     # Start the sentence with the SOS ordinal, ordinal value is 0
     # One-hot the values for generation
@@ -32,7 +41,7 @@ def generateText(data, model):
     EOSreached = False
     currSeqIndex = 0
     hc = None
-    Temp = cfg['temperature']
+    Temp = temp
     
     model.to(device)
     
@@ -82,9 +91,20 @@ def generateText(data, model):
     
     print("Finished text generation...", flush=True)
     
-    return generated, text
+    return generated
 
 if __name__ == "__main__":
+    
+    # Check for arguments
+    if (len(sys.argv) < 4):
+      print("Usage: python train_model.py <Temperature> <Number of samples> <Max length of each sample>", flush=True)
+      sys.exit()
+    
+    # Parse arguments
+    temp = float(sys.argv[1])
+    num_samples = int(sys.argv[2])
+    max_len = int(sys.argv[3])
+    
     
     print("Loading necessary files to generate...", flush=True)
     # Get dataset to know meta-data
@@ -94,7 +114,7 @@ if __name__ == "__main__":
     
     # Get path
     checkpointPath = 'model_checkpoints/training_session0/'
-    savedModePath = 'LSTMmodel_Final.mdl'
+    savedModePath = 'LSTMmodel_Final.fnl'
     
     # Load in trained model
     model = load_model(os.path.join(checkpointPath, savedModePath))
@@ -113,5 +133,15 @@ if __name__ == "__main__":
     print("Beginning text generation...", flush=True)
     
     # Generate text
-    gen = generateText(train_set, model)
+    gen = generateText(train_set, model, temp, num_samples, max_len)
+    
+    # Write out generated texts into result file
+    resultPath = "./results/"
+    resultFile = "generatedsamples_temp_{0}".format(temp)
+    
+    with open(os.path.join(resultPath, resultFile), "w+") as resFile:
+        
+        for text in gen:
+            resFile.write(text+"\n")
+            resFile.write("---------------------------\n")
     

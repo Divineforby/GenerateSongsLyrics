@@ -170,7 +170,7 @@ def train(model, train_set, val_set):
                 print("Validation Loss at batch %d of epoch %d is %f" % (idx, e, val_loss), flush=True)
 
                 # Write to log
-                with open(os.path.join (checkpointPath, 'output.log' ), "w+") as logfile:
+                with open(os.path.join (checkpointPath, 'output.log' ), "a+") as logfile:
                     logfile.write("Epoch: {0} Batch: {1}\nTraining Loss: {2}\nValidation Loss: {3}\n\n"
                                   .format(e, idx, avg_loss, val_loss))
                                   
