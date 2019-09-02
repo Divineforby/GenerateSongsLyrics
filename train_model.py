@@ -1,5 +1,5 @@
 from models import GenLSTM
-from dataloader import SongData, Pad, onehot
+from dataloader import SongData, Pad, onehot, data_split
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
@@ -27,10 +27,10 @@ def makeSessionDir():
     return path
 
 # Calculate Validation Loss
-def validation(model, val_set, device, LossFcn):
+def validation(model, val_set):
     # No need to calculate gradients
     with torch.no_grad():
-
+        LossFcn = torch.nn.CrossEntropyLoss()
         # Config
         batchSize = cfg['validation_batch_size']
 
@@ -53,7 +53,7 @@ def validation(model, val_set, device, LossFcn):
             data, labels = data.to(device), labels.to(device)
 
             # Run the data through the model
-            Output = model(data)
+            Output, hc = model(data)
 
             # Reshape output and loss to interpret timesteps as another sample
             Output, labels = Output.view(Output.shape[0]*Output.shape[1], -1), labels.view(labels.shape[0]*labels.shape[1])
@@ -76,17 +76,6 @@ def train(model, train_set, val_set):
     lr = cfg['lr']
     l2_decay = cfg['l2_penalty']
     batchSize = cfg['batch_size']
-    useCuda = cfg['use_cuda']
-
-    # Check for cuda and set default compute device
-    if ( torch.cuda.is_available() and useCuda ):
-        device = torch.device("cuda")
-
-    else:
-        device = torch.device("cpu")
-
-    print("Using %s for compute..." % device.type, flush=True)
-
 
     # Send model to chose device
     model = model.to(device)
@@ -127,7 +116,7 @@ def train(model, train_set, val_set):
         for idx, (data, labels) in enumerate(train_loader):
 
             # One_hot the inputs using the number of possible encoding values
-            data = onehot(data, len(train_set.encode))
+            data = onehot(data, len(SongData.vocab))
 
             # Push data and labels onto device
             data, labels = data.to(device), labels.to(device)
@@ -136,7 +125,7 @@ def train(model, train_set, val_set):
             optim.zero_grad()
 
             # Run the data through the model
-            Output = model(data)
+            Output, hc = model(data)
 
             # Reshape output and loss to interpret timesteps as another sample
             Output, labels = Output.view(Output.shape[0]*Output.shape[1], -1), labels.view(labels.shape[0]*labels.shape[1])
@@ -173,8 +162,8 @@ def train(model, train_set, val_set):
 
                 # Try to clear some unused variable and run validation
                 # reset to training mode
-                del Loss, Output, data, labels
-                val_loss = validation(model, val_set, device, LossFcn)
+                del Loss, Output, data, labels, hc
+                val_loss = validation(model, val_set)
                 model.train()
 
                 epoch_val_losses.append(val_loss)
@@ -190,8 +179,8 @@ def train(model, train_set, val_set):
                 # Only check when we have at least early_stopping_range values to check
                 # Give at least one epoch before we check for early stopping
                 if (e > 0 and 
-                    len(epoch_val_losses[early_stopping_range::-1]) == early_stopping_range and 
-                    monotonicIncr(epoch_val_losses[early_stopping_range::-1])):
+                    len(epoch_val_losses[(early_stopping_range-1)::-1]) == early_stopping_range and 
+                    monotonicIncr(epoch_val_losses[(early_stopping_range-1)::-1])):
                     
                     early_stopping = True            
 
@@ -226,38 +215,14 @@ def monotonicIncr(lst):
     # If all the differences are > 0 we are monotonically decreasing
     return diff.all()
 
-# Splits up full dataset to train and validation
-# Returns pytorch Dataset of splits
-def data_split(data):
-
-    # Sample 10% from the dataset for validation
-    val = data.sample(frac = .01)
-
-    # Remove the sampled rows from the original
-    train = data.drop(val.index)
-
-    # Reset both indices for uniformity
-    val = val.reset_index(drop=True)
-    train = train.reset_index(drop=True)
-
-    # Make song datasets from both dataframes
-    val_set = SongData(val)
-    train_set = SongData(train)
-
-    return train_set, val_set
-
-# Generate new song lyrics
-def GenerateLyrics():
-    pass
-
-
 # Entry point
 if __name__ == "__main__":
 
     print("Reading data from CSV...", flush=True)
 
-    # Read in data and create train_val split
+    # Read in data and construct our vocabulary so we can use song data
     data = pd.read_csv('songdata.csv')
+    SongData.init_vocab(data)
 
     print("Dividing whole data into training and validation sets...", flush=True)
 
@@ -267,9 +232,19 @@ if __name__ == "__main__":
     # Make fresh model to train
     # Both input and output are size of possible characters
     # We are inputting characters at t and asking to predict character t+1
-    model = GenLSTM(input_size = len(train_set.encode), output_size = len(train_set.encode) )
+    model = GenLSTM(input_size = len(SongData.vocab), output_size = len(SongData.vocab) )
 
     print("Beginning model training...", flush=True)
+    
+    useCuda = cfg['use_cuda']
+    # Check for cuda and set default compute device
+    if ( torch.cuda.is_available() and useCuda ):
+        device = torch.device("cuda")
+
+    else:
+        device = torch.device("cpu")
+
+    print("Using %s for compute..." % device.type, flush=True)
 
     # Train the model
     train(model, train_set, val_set)

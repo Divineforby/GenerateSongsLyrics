@@ -4,6 +4,26 @@ import numpy as np
 import pandas as pd
 import os
 
+# Splits up full dataset to train and validation
+# Returns pytorch Dataset of splits
+def data_split(data):
+
+    # Sample 10% from the dataset for validation
+    val = data.sample(frac = .01)
+
+    # Remove the sampled rows from the original
+    train = data.drop(val.index)
+
+    # Reset both indices for uniformity
+    val = val.reset_index(drop=True)
+    train = train.reset_index(drop=True)
+
+    # Make song datasets from both dataframes
+    val_set = SongData(val)
+    train_set = SongData(train)
+
+    return train_set, val_set
+
 # Takes a numpy array of indices and create one-hot array for all of these indices
 # Return the tensor
 def onehot(indices, numFeature):
@@ -38,6 +58,10 @@ def Pad(batch):
 # Pytorch dataset of for song lyrics
 class SongData(Dataset):
     
+    # Global vocabulary for our dataset
+    # Must initialize before using
+    vocab = None
+    
     # Constructs the dataset by loading in the csv file for song lyrics
     def __init__(self, dataframe):
         
@@ -45,7 +69,7 @@ class SongData(Dataset):
         self.data = dataframe
 
         # Used for indexing when one-hotting encoding characters
-        self.encode = self.ChartoOrd(self.data)
+        self.encode = SongData.vocab
         # Create the reverse mapping to decode
         self.decode = self.OrdtoChar(self.encode)
         
@@ -76,9 +100,23 @@ class SongData(Dataset):
         # One hots the indices and return the tensor
         return ordinals, labels
     
-    
+    # Reverse the encoder dict 
+    def OrdtoChar(self, encoder):
+        
+        # Make a decoder mapping
+        decoded = {}
+        
+        # Reverse
+        for k,v in encoder.items():
+            decoded[v] = k
+        
+        
+        return decoded 
+        
     # Finds all unique characters and assign them an ordinal value 
-    def ChartoOrd(self, data):
+    # Must be ran to initialize class before usage
+    @staticmethod
+    def init_vocab(data):
         
         # Dictionary of unique characters
         uniqueChars = {}
@@ -99,18 +137,5 @@ class SongData(Dataset):
                     uniqueChars[c] = ordCounter
                     ordCounter += 1
             
-        return uniqueChars
-    
-    # Reverse the encoder dict 
-    def OrdtoChar(self, encoder):
-        
-        # Make a decoder mapping
-        decoded = {}
-        
-        # Reverse
-        for k,v in encoder.items():
-            decoded[v] = k
-        
-        
-        return decoded 
+        SongData.vocab = uniqueChars
  

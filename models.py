@@ -25,15 +25,22 @@ class GenLSTM(torch.nn.Module):
         torch.nn.init.xavier_normal_(self.FC.weight)
         
     # Define the forward pass    
-    def forward(self, x):
+    def forward(self, x, hc=None):
         
-        # Run through LSTM units
-        out, hc = self.LSTM(x)
+        # If hc is none we don't pass in the initial hidden and cell state
+        if not hc:
+ 
+            out, hc = self.LSTM(x)
+    
+        # If it is defined we pass them in
+        else:
+            out, hc = self.LSTM(x, hc)
+            
         
         # Run through FC for final layer
         out = self.FC(out)
         
         # Want raw outputs and not softmax to apply 
         # temperature during generation
-        return out
+        return out, hc
         
