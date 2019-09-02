@@ -47,7 +47,7 @@ def validation(model, val_set):
         for idx, (data, labels) in enumerate(validation_loader):
 
             # One_hot
-            data = onehot(data, len(val_set.encode))
+            data = onehot(data, len(SongData.vocab))
 
             # Push data and labels onto device
             data, labels = data.to(device), labels.to(device)
@@ -158,8 +158,6 @@ def train(model, train_set, val_set):
                 batch_loss = 0
                 epoch_losses.append(avg_loss)
 
-                print("Loss at batch %d of epoch %d is %f" % (idx, e, avg_loss), flush=True)
-
                 # Try to clear some unused variable and run validation
                 # reset to training mode
                 del Loss, Output, data, labels, hc
@@ -168,6 +166,7 @@ def train(model, train_set, val_set):
 
                 epoch_val_losses.append(val_loss)
 
+                print("Loss at batch %d of epoch %d is %f" % (idx, e, avg_loss), flush=True)
                 print("Validation Loss at batch %d of epoch %d is %f" % (idx, e, val_loss), flush=True)
 
                 # Write to log

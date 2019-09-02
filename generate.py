@@ -10,7 +10,7 @@ from configs import cfg
 def load_model(path):
     
     # Make a fresh model
-    model = GenLSTM(input_size = len(SongData.vocab), output_size = len(SongData.vocab) )
+    model = GenLSTM(input_size = len(SongData.vocab), output_size = len(SongData.vocab))
     
     # Load in saved model params at checkpoint path
     model.load_state_dict(torch.load(path))
@@ -23,7 +23,7 @@ def generateText(data, model):
     # Number of texts to generate
     # Max length of text
     numText = 10
-    maxLen = 500
+    maxLen = 1000
     
     # Start the sentence with the SOS ordinal, ordinal value is 0
     # One-hot the values for generation
@@ -62,7 +62,7 @@ def generateText(data, model):
             probs = torch.nn.functional.softmax(output/Temp, dim=2)
             
             # Create distribution and sample for the next indices
-            sampled = torch.distributions.Categorical(probs).sample()
+            sampled = torch.distributions.categorical.Categorical(probs).sample()
             
             # Join sample with the current body of characters
             text = torch.cat((text, sampled.cpu()), dim=1)
@@ -76,12 +76,13 @@ def generateText(data, model):
     # Decode the ordinals to characters
     generated = [''.join([data.decode[c] for c in gen]) for gen in np.array(text)]
     
-    # For each string remove everything after the first EOS(\3)
-    generated = [text[0:text.find('\3')+1] for text in generated]
+    # For each string remove everything after the first EOS(\3) and remove all SOS(\2)
+    generated = [text[0:text.find('\3')+1].replace('\2','') if text.find('\3') > 0 else text.replace('\2','') 
+                 for text in generated]
     
     print("Finished text generation...", flush=True)
     
-    return generated
+    return generated, text
 
 if __name__ == "__main__":
     
@@ -93,11 +94,10 @@ if __name__ == "__main__":
     
     # Get path
     checkpointPath = 'model_checkpoints/training_session0/'
-    savedModePath = 'LSTMmodel_E_1_B_1338.mdl'
+    savedModePath = 'LSTMmodel_Final.mdl'
     
     # Load in trained model
-    model = load_model(data, os.path.join(checkpointPath, savedModePath))
-    
+    model = load_model(os.path.join(checkpointPath, savedModePath))
     
     useCuda = cfg['use_cuda']
     # Check for cuda and set default compute device
@@ -114,6 +114,4 @@ if __name__ == "__main__":
     
     # Generate text
     gen = generateText(train_set, model)
-    
-
     

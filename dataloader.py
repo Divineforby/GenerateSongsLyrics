@@ -110,7 +110,6 @@ class SongData(Dataset):
         for k,v in encoder.items():
             decoded[v] = k
         
-        
         return decoded 
         
     # Finds all unique characters and assign them an ordinal value 
