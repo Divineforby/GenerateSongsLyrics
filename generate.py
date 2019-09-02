@@ -2,7 +2,7 @@ import torch
 import pandas as pd
 import numpy as np
 import os
-from dataloader import data_split,onehot
+from dataloader import data_split,onehot, SongData
 from models import GenLSTM
 from configs import cfg
 
