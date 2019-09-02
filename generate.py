@@ -97,7 +97,7 @@ if __name__ == "__main__":
     
     # Check for arguments
     if (len(sys.argv) < 4):
-      print("Usage: python train_model.py <Temperature> <Number of samples> <Max length of each sample>", flush=True)
+      print("Usage: python generate.py <Temperature> <Number of samples> <Max length of each sample>", flush=True)
       sys.exit()
     
     # Parse arguments
@@ -140,8 +140,9 @@ if __name__ == "__main__":
     resultFile = "generatedsamples_temp_{0}".format(temp)
     
     with open(os.path.join(resultPath, resultFile), "w+") as resFile:
-        
-        for text in gen:
+        resFile.write("Generated sample using these options: Temperature - {0} Number of Samples - {1} Max Length Per Sample - {2}".format(temp, num_samples, max_len)) 
+        for idx, text in enumerate(gen):
+            resFile.write("SAMPLE NUMBER {0} \n\n".format(idx))
             resFile.write(text+"\n")
-            resFile.write("---------------------------\n")
+            resFile.write("---------------------------\n\n")
     
