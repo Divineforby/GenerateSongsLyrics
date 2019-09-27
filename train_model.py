@@ -1,4 +1,4 @@
-from models import GenLSTM
+from models import *
 from dataloader import SongData, Pad, onehot, data_split
 from torch.utils.data import DataLoader
 import torch
@@ -12,7 +12,7 @@ from configs import cfg
 def makeSessionDir():
 
     # Get all the indices of the sessions
-    sessionIndices = [int(name[-1]) for name in os.listdir(path='model_checkpoints/') if 'training_session' in name]
+    sessionIndices = [int(name.split('_')[-1])for name in os.listdir(path='model_checkpoints/') if 'training_session' in name]
 
     # If none exists we make the index 0
     if ( not sessionIndices ):
@@ -21,7 +21,7 @@ def makeSessionDir():
         newIndex = max(sessionIndices) + 1
 
     # Make the new folder and return the path
-    path = './model_checkpoints/training_session' + str(newIndex)
+    path = './model_checkpoints/training_session_' + str(newIndex)
     os.mkdir(path)
 
     return path
@@ -35,7 +35,7 @@ def validation(model, val_set):
         batchSize = cfg['validation_batch_size']
 
         # Validation set data loader
-        validation_loader = DataLoader(val_set, batch_size=batchSize, collate_fn=Pad)
+        validation_loader = DataLoader(val_set, batch_size=batchSize, collate_fn=Pad, pin_memory=True)
 
         # Validation loss
         val_loss = 0
@@ -46,14 +46,12 @@ def validation(model, val_set):
         # Calculate loss w.r.t the entire validation set
         for idx, (data, labels) in enumerate(validation_loader):
 
-            # One_hot
-            data = onehot(data, len(SongData.vocab))
-
             # Push data and labels onto device
             data, labels = data.to(device), labels.to(device)
-
+            
             # Run the data through the model
             Output, hc = model(data)
+            del data
 
             # Reshape output and loss to interpret timesteps as another sample
             Output, labels = Output.view(Output.shape[0]*Output.shape[1], -1), labels.view(labels.shape[0]*labels.shape[1])
@@ -61,6 +59,8 @@ def validation(model, val_set):
             # Compute Loss and add to average
             Loss = LossFcn(Output, labels)
             val_loss += float(Loss.item())
+            
+            del Output, hc, Loss, labels
 
         # Average loss over entire set
         val_loss /= idx
@@ -81,7 +81,7 @@ def train(model, train_set, val_set):
     model = model.to(device)
 
     # Create training set data loader, loss, and optimizer
-    train_loader = DataLoader(train_set, batch_size=batchSize, collate_fn=Pad, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=batchSize, collate_fn=Pad, shuffle=True, pin_memory=True)
     LossFcn = torch.nn.CrossEntropyLoss()
     optim = torch.optim.Adam(params=model.parameters(), lr = lr, weight_decay=l2_decay)
 
@@ -112,6 +112,7 @@ def train(model, train_set, val_set):
 
         # Calculate validation loss per epoch and print
 
+        print("Validation begins...", flush=True)
 
         # Try to clear some unused variable and run validation
         # reset to training mode
@@ -135,12 +136,9 @@ def train(model, train_set, val_set):
             monotonicIncr(epoch_val_losses[(early_stopping_range-1)::-1])):
             break
          
-
+        print("Training begins..." , flush=True)
         # For each batch in the loader send all
         for idx, (data, labels) in enumerate(train_loader):
-
-            # One_hot the inputs using the number of possible encoding values
-            data = onehot(data, len(SongData.vocab))
 
             # Push data and labels onto device
             data, labels = data.to(device), labels.to(device)
@@ -150,6 +148,7 @@ def train(model, train_set, val_set):
 
             # Run the data through the model
             Output, hc = model(data)
+            del data
 
             # Reshape output and loss to interpret timesteps as another sample
             Output, labels = Output.view(Output.shape[0]*Output.shape[1], -1), labels.view(labels.shape[0]*labels.shape[1])
@@ -161,6 +160,8 @@ def train(model, train_set, val_set):
             # Take gradient and update
             Loss.backward()
             optim.step()
+            
+            del Loss, Output, labels, hc
             
             # Checkpoint
             if ( idx % M == 0 and idx > 0 ):
@@ -178,7 +179,7 @@ def train(model, train_set, val_set):
             if ( idx % N == 0 and idx > 0  ):
 
                 # Calculate average training loss of N batches
-                avg_loss = batch_loss/idx
+                avg_loss = batch_loss/N
                 batch_loss = 0
                 epoch_losses.append(avg_loss)
 
@@ -190,8 +191,6 @@ def train(model, train_set, val_set):
                     logfile.write("Epoch: {0} Batch: {1}\nTraining Loss: {2}\n"
                                   .format(e, idx, avg_loss))
                     
-      
-        del Loss, Output, data, labels, hc
  
 
     # Write out the loss arrays
@@ -225,7 +224,6 @@ if __name__ == "__main__":
     # Read in data and construct our vocabulary so we can use song data
     data = pd.read_csv('songdata.csv')
     SongData.init_vocab(data)
-
     print("Dividing whole data into training and validation sets...", flush=True)
 
     # Split data to training and validation set
@@ -234,8 +232,8 @@ if __name__ == "__main__":
     # Make fresh model to train
     # Both input and output are size of possible characters
     # We are inputting characters at t and asking to predict character t+1
-    model = GenLSTM(input_size = len(SongData.vocab), output_size = len(SongData.vocab) )
-
+    model = GenGRU(input_size = len(SongData.vocab), output_size = len(SongData.vocab) )
+    
     print("Beginning model training...", flush=True)
     
     useCuda = cfg['use_cuda']
@@ -250,4 +248,3 @@ if __name__ == "__main__":
 
     # Train the model
     train(model, train_set, val_set)
-

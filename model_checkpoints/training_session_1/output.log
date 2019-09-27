@@ -1,0 +1,29 @@
+Epoch: 0 
+ Validation Loss: 4.6008079051971436
+---------------------------
+Epoch: 0 Batch: 50
+Training Loss: 3.401218910217285
+Epoch: 0 Batch: 100
+Training Loss: 1.9658314728736876
+Epoch: 0 Batch: 150
+Training Loss: 1.5399853014945983
+Epoch: 0 Batch: 200
+Training Loss: 1.5283118510246276
+Epoch: 0 Batch: 250
+Training Loss: 1.4833884239196777
+Epoch: 0 Batch: 300
+Training Loss: 1.3966844367980957
+Epoch: 0 Batch: 350
+Training Loss: 1.4089625918865203
+Epoch: 0 Batch: 400
+Training Loss: 1.3863044798374176
+Epoch: 0 Batch: 450
+Training Loss: 1.1618555319309234
+Epoch: 0 Batch: 500
+Training Loss: 1.0819810557365417
+Epoch: 0 Batch: 550
+Training Loss: 0.8935693025588989
+Epoch: 0 Batch: 600
+Training Loss: 0.6766708570718766
+Epoch: 0 Batch: 650
+Training Loss: 0.5881235855817795

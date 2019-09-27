@@ -9,7 +9,7 @@ import os
 def data_split(data):
 
     # Sample 10% from the dataset for validation
-    val = data.sample(frac = .1)
+    val = data.sample(frac = .02)
 
     # Remove the sampled rows from the original
     train = data.drop(val.index)
@@ -52,6 +52,9 @@ def Pad(batch):
     # Pad both data and target with EOS
     data = torch.nn.utils.rnn.pad_sequence(data, batch_first=True, padding_value=1)
     target = torch.nn.utils.rnn.pad_sequence(target, batch_first=True, padding_value=1)
+    
+    # Onehot the data
+    data = onehot(data, len(SongData.vocab))
     
     return data, target
 
@@ -137,4 +140,7 @@ class SongData(Dataset):
                     ordCounter += 1
             
         SongData.vocab = uniqueChars
+        
+        
+    
  

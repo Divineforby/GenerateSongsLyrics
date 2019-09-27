@@ -4,14 +4,14 @@ import numpy as np
 import os
 import sys
 from dataloader import data_split,onehot, SongData
-from models import GenLSTM
+from models import *
 from configs import cfg
 
 # Load the state_dict of a model given path
 def load_model(path):
     
     # Make a fresh model
-    model = GenLSTM(input_size = len(SongData.vocab), output_size = len(SongData.vocab))
+    model = GenGRU(input_size = len(SongData.vocab), output_size = len(SongData.vocab))
     
     # Load in saved model params at checkpoint path
     model.load_state_dict(torch.load(path))
@@ -50,14 +50,8 @@ def generateText(data, model, temp, num_samples, max_len):
             # Onehot the batch at the current sequence index
             oh_input = onehot(text[:,currSeqIndex:currSeqIndex+1], len(data.encode))
             oh_input = oh_input.to(device)
-            
-            # Pass characters at current sequence index through model
-            # First character we don't have hc
-            if not hc:
-                output, hc = model(oh_input)
-            # Every subsequent character we pass in the previous hc
-            else:
-                output, hc = model(oh_input, hc)
+           
+            output, hc = model(oh_input, hc)
                 
             # Convert outputs to probabilities using softmax with temperature
             probs = torch.nn.functional.softmax(output/Temp, dim=2)
@@ -97,17 +91,19 @@ if __name__ == "__main__":
     num_samples = int(sys.argv[2])
     max_len = int(sys.argv[3])
     
-    train_sess = 4
     
     print("Loading necessary files to generate...", flush=True)
     # Get dataset to know meta-data
     data = pd.read_csv('songdata.csv')
     SongData.init_vocab(data)
     train_set, val_set = data_split(data)
-    
+   
+
+    train_sess = 0
+
     # Get path
-    checkpointPath = 'model_checkpoints/training_session{0}/'.format(train_sess)
-    savedModePath = 'LSTMmodel_Final.fnl'
+    checkpointPath = 'model_checkpoints/training_session_{0}/'.format(train_sess)
+    savedModePath = 'LSTMmodel_E_49_B_2649.mdl'
     
     # Load in trained model
     model = load_model(os.path.join(checkpointPath, savedModePath))
