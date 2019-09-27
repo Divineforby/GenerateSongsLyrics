@@ -97,6 +97,7 @@ if __name__ == "__main__":
     num_samples = int(sys.argv[2])
     max_len = int(sys.argv[3])
     
+    train_sess = 4
     
     print("Loading necessary files to generate...", flush=True)
     # Get dataset to know meta-data
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     train_set, val_set = data_split(data)
     
     # Get path
-    checkpointPath = 'model_checkpoints/training_session0/'
+    checkpointPath = 'model_checkpoints/training_session{0}/'.format(train_sess)
     savedModePath = 'LSTMmodel_Final.fnl'
     
     # Load in trained model

@@ -9,7 +9,7 @@ import os
 def data_split(data):
 
     # Sample 10% from the dataset for validation
-    val = data.sample(frac = .01)
+    val = data.sample(frac = .1)
 
     # Remove the sampled rows from the original
     train = data.drop(val.index)

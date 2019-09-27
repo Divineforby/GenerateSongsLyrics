@@ -1,0 +1,140 @@
+Epoch: 0 
+ Validation Loss: 4.403758674197727
+---------------------------
+Epoch: 0 Batch: 50
+Training Loss: 4.29613950252533
+Epoch: 0 Batch: 100
+Training Loss: 1.4872713279724121
+Epoch: 0 Batch: 150
+Training Loss: 0.6331842613220214
+Epoch: 0 Batch: 200
+Training Loss: 0.41277114510536195
+Epoch: 0 Batch: 250
+Training Loss: 0.3171627745628357
+Epoch: 0 Batch: 300
+Training Loss: 0.26130217134952544
+Epoch: 0 Batch: 350
+Training Loss: 0.22174586960247586
+Epoch: 0 Batch: 400
+Training Loss: 0.1912691181898117
+Epoch: 0 Batch: 450
+Training Loss: 0.16505475613805984
+Epoch: 0 Batch: 500
+Training Loss: 0.1678962985277176
+Epoch: 0 Batch: 550
+Training Loss: 0.1404741674119776
+Epoch: 0 Batch: 600
+Training Loss: 0.12793890078862508
+Epoch: 0 Batch: 650
+Training Loss: 0.11887469346706683
+Epoch: 0 Batch: 700
+Training Loss: 0.10675730245453971
+Epoch: 0 Batch: 750
+Training Loss: 0.10095934693018595
+Epoch: 0 Batch: 800
+Training Loss: 0.0951436422765255
+Epoch: 0 Batch: 850
+Training Loss: 0.08550196219893062
+Epoch: 0 Batch: 900
+Training Loss: 0.08430360290739271
+Epoch: 0 Batch: 950
+Training Loss: 0.08008689058454413
+Epoch: 0 Batch: 1000
+Training Loss: 0.07561938446760177
+Epoch: 0 Batch: 1050
+Training Loss: 0.06938965218407767
+Epoch: 0 Batch: 1100
+Training Loss: 0.0682456001368436
+Epoch: 0 Batch: 1150
+Training Loss: 0.0659611311684484
+Epoch: 0 Batch: 1200
+Training Loss: 0.06452766085664431
+Epoch: 0 Batch: 1250
+Training Loss: 0.06218071355819702
+Epoch: 0 Batch: 1300
+Training Loss: 0.05889682668905992
+Epoch: 0 Batch: 1350
+Training Loss: 0.05725192970699734
+Epoch: 0 Batch: 1400
+Training Loss: 0.05418007944311414
+Epoch: 0 Batch: 1450
+Training Loss: 0.052058226363412265
+Epoch: 0 Batch: 1500
+Training Loss: 0.049830366452534997
+Epoch: 0 Batch: 1550
+Training Loss: 0.04579212465593892
+Epoch: 0 Batch: 1600
+Training Loss: 0.04891639571636915
+Epoch: 0 Batch: 1650
+Training Loss: 0.04286949970505454
+Epoch: 0 Batch: 1700
+Training Loss: 0.043342469019048355
+Epoch: 0 Batch: 1750
+Training Loss: 0.04218419708524432
+Epoch: 0 Batch: 1800
+Training Loss: 0.040610222220420836
+Epoch: 0 Batch: 1850
+Training Loss: 0.041700961267625965
+Epoch: 0 Batch: 1900
+Training Loss: 0.039115645759984066
+Epoch: 0 Batch: 1950
+Training Loss: 0.038055212436578216
+Epoch: 0 Batch: 2000
+Training Loss: 0.03645001175999642
+Epoch: 0 Batch: 2050
+Training Loss: 0.036244111555378614
+Epoch: 0 Batch: 2100
+Training Loss: 0.03411909174351465
+Epoch: 0 Batch: 2150
+Training Loss: 0.03273232146751049
+Epoch: 0 Batch: 2200
+Training Loss: 0.034854134754701095
+Epoch: 0 Batch: 2250
+Training Loss: 0.03255152723524306
+Epoch: 0 Batch: 2300
+Training Loss: 0.030905309578646786
+Epoch: 0 Batch: 2350
+Training Loss: 0.03105437233092937
+Epoch: 0 Batch: 2400
+Training Loss: 0.02944675341248512
+Epoch: 0 Batch: 2450
+Training Loss: 0.030261524818381486
+Epoch: 0 Batch: 2500
+Training Loss: 0.029039408373832704
+Epoch: 0 Batch: 2550
+Training Loss: 0.02808775600265054
+Epoch: 0 Batch: 2600
+Training Loss: 0.027836203345885643
+Epoch: 0 Batch: 2650
+Training Loss: 0.025590081574781886
+Epoch: 0 Batch: 2700
+Training Loss: 0.025837797500469068
+Epoch: 0 Batch: 2750
+Training Loss: 0.02485195886005055
+Epoch: 0 Batch: 2800
+Training Loss: 0.02522351039307458
+Epoch: 0 Batch: 2850
+Training Loss: 0.024899156616445175
+Epoch: 0 Batch: 2900
+Training Loss: 0.02343769112537647
+Epoch: 0 Batch: 2950
+Training Loss: 0.02470979650141829
+Epoch: 0 Batch: 3000
+Training Loss: 0.021812806685765584
+Epoch: 0 Batch: 3050
+Training Loss: 0.023218482615517788
+Epoch: 0 Batch: 3100
+Training Loss: 0.022254298098625676
+Epoch: 0 Batch: 3150
+Training Loss: 0.021030120754998827
+Epoch: 0 Batch: 3200
+Training Loss: 0.02036374868825078
+Epoch: 1 
+ Validation Loss: 1.0040260003672705
+---------------------------
+Epoch: 1 Batch: 50
+Training Loss: 1.3902441191673278
+Epoch: 1 Batch: 100
+Training Loss: 0.682894983291626
+Epoch: 1 Batch: 150
+Training Loss: 0.4359104017416636

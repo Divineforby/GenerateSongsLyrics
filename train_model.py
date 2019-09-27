@@ -88,7 +88,7 @@ def train(model, train_set, val_set):
     # Loss collection and model chkpt every Nth batch
     # Checkpoint every Mth batch
     N = 50
-    M = len(train_loader)/4
+    M = (len(train_loader))/4
 
     # Training mode
     model.train()
@@ -100,10 +100,8 @@ def train(model, train_set, val_set):
     epoch_losses = []
     epoch_val_losses = []
 
-    # Early stopping boolean
-    # If the values in the early_stopping_range is monotonically increasing
-    early_stopping = False
-    early_stopping_range = 4
+    # If the values in the early_stopping_range is monotonically increasing we can stop training
+    early_stopping_range = 2
 
     # For each epoch train the model on the data
     for e in maxEpochs:
@@ -111,6 +109,32 @@ def train(model, train_set, val_set):
         print("In epoch %d..." % e)
 
         batch_loss = 0
+
+        # Calculate validation loss per epoch and print
+
+
+        # Try to clear some unused variable and run validation
+        # reset to training mode
+        val_loss = validation(model, val_set)
+        model.train()
+
+        epoch_val_losses.append(val_loss)
+        print("Validation Loss at epoch %d is %f\n---------------------------" % (e, val_loss), flush=True)
+        
+        # Write to log
+        with open(os.path.join (checkpointPath, 'output.log' ), "a+") as logfile:
+          logfile.write("Epoch: {0} \n Validation Loss: {1}\n---------------------------\n"
+                        .format(e, val_loss))
+                                          
+        
+        # Check for early stopping with monotonicity
+        # Only check when we have at least early_stopping_range values to check
+        # Give at least one epoch before we check for early stopping
+        if (e > 0 and 
+            len(epoch_val_losses[(early_stopping_range-1)::-1]) == early_stopping_range and 
+            monotonicIncr(epoch_val_losses[(early_stopping_range-1)::-1])):
+            break
+         
 
         # For each batch in the loader send all
         for idx, (data, labels) in enumerate(train_loader):
@@ -158,38 +182,17 @@ def train(model, train_set, val_set):
                 batch_loss = 0
                 epoch_losses.append(avg_loss)
 
-                # Try to clear some unused variable and run validation
-                # reset to training mode
-                del Loss, Output, data, labels, hc
-                val_loss = validation(model, val_set)
-                model.train()
-
-                epoch_val_losses.append(val_loss)
-
+               
                 print("Loss at batch %d of epoch %d is %f" % (idx, e, avg_loss), flush=True)
-                print("Validation Loss at batch %d of epoch %d is %f" % (idx, e, val_loss), flush=True)
 
                 # Write to log
                 with open(os.path.join (checkpointPath, 'output.log' ), "a+") as logfile:
-                    logfile.write("Epoch: {0} Batch: {1}\nTraining Loss: {2}\nValidation Loss: {3}\n\n"
-                                  .format(e, idx, avg_loss, val_loss))
-                                  
-                # Check for early stopping with monotonicity
-                # Only check when we have at least early_stopping_range values to check
-                # Give at least one epoch before we check for early stopping
-                if (e > 0 and 
-                    len(epoch_val_losses[(early_stopping_range-1)::-1]) == early_stopping_range and 
-                    monotonicIncr(epoch_val_losses[(early_stopping_range-1)::-1])):
+                    logfile.write("Epoch: {0} Batch: {1}\nTraining Loss: {2}\n"
+                                  .format(e, idx, avg_loss))
                     
-                    early_stopping = True            
-
-            # If early stopping we stop going through the data set
-            if (early_stopping):
-                break
-
-        # Break out of epoch loop
-        if (early_stopping):
-            break
+      
+        del Loss, Output, data, labels, hc
+ 
 
     # Write out the loss arrays
     with open(os.path.join(checkpointPath, 'train_losses.pkl'), "wb+") as tlossfile:
@@ -247,3 +250,4 @@ if __name__ == "__main__":
 
     # Train the model
     train(model, train_set, val_set)
+
